@@ -1156,12 +1156,12 @@ class MigrationProject(object):
                 # Update teh custom domain
                 if self.__settings['github_pages_url_type'] == 1:
                     pages_data = {
-                        "cname": self.__settings['github_pages_custom_url']
+                        "cname": self.__settings['github_pages_custom_url'],
                         "source": "master"
                     }
                 else:
                     pages_data = {
-                        "cname": None
+                        "cname": None,
                         "source": "master"
                     }
                 response = requests.put(
