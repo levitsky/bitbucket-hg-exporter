@@ -29,7 +29,7 @@ from urllib import parse
 from distutils.dir_util import copy_tree
 
 from . import hg2git
-from . import __version__ as software_version 
+from . import __version__ as software_version
 from .issue_migrate import import_issues_to_github
 
 bitbucket_api_url = 'https://api.bitbucket.org/2.0/'
@@ -60,7 +60,7 @@ def _kill_threads_nicely(signum, frame):
                 print(pad_message('WARNING: Thread {} did not terminate nicely'.format(name)))
             else:
                 print(pad_message('Thread {} ended nicely'.format(name)))
-                
+
 
     if signum == signal.SIGINT and _previous_sigint not in [None, signal.SIG_IGN, signal.SIG_DFL]:
         _previous_sigint(signum, frame)
@@ -68,10 +68,10 @@ def _kill_threads_nicely(signum, frame):
         _previous_sigterm(signum, frame)
     # if signum == signal.SIGKILL and _previous_sigkill not in [None, signal.SIG_IGN, signal.SIG_DFL]:
         # _previous_sigkill(signum, frame)
-        
+
     # force terminate
-    os._exit(1) 
-        
+    os._exit(1)
+
 signal.signal(signal.SIGINT, _kill_threads_nicely)
 signal.signal(signal.SIGTERM, _kill_threads_nicely)
 
@@ -329,8 +329,8 @@ class MigrationProject(object):
         # confirm settings before beginning
         while not self.__print_project_settings():
             choices = {
-                "Change primary BitBucket credentials":0, 
-                "Add/remove additional BitBucket credentials":1, 
+                "Change primary BitBucket credentials":0,
+                "Add/remove additional BitBucket credentials":1,
                 "Change BitBucket repositories to export":2,
                 "Change export settings":3,
                 "Change primary GitHub credentials":4,
@@ -359,17 +359,17 @@ class MigrationProject(object):
 
         # save the project
         self.__save_project_settings()
-        
+
         # prompt to start project
         print('Project configuration saved!')
         #TODO: make resume have nicer text prompts
         choices = {
-            "Start export":0, 
+            "Start export":0,
             "Exit":1,
         }
         response = q.select("What would you like to do?", choices=choices.keys()).ask()
         if choices[response] == 0:
-            
+
             faq_read = q.confirm("I have read the entire readme at https://github.com/philipstarkey/bitbucket-hg-exporter (including the FAQ) and understood the caveats listed. I understand that I use this tool at my own risk. Answer 'Y' for agree or 'N' to terminate the program:", default=False).ask()
             if not faq_read:
                 sys.exit(1)
@@ -421,7 +421,7 @@ class MigrationProject(object):
                     else:
                         print('Failed to query BitBucket API when determining forks for {}.'.format(repository['full_name']))
                         sys.exit(1)
-            
+
             if self.__settings['backup_forks']:
                 if self.__settings['fork_search_complete']:
                     search = q.confirm('A previous run of this script determined the list of all repository forks. Would you like to search for any new forks since the last run?').ask()
@@ -513,7 +513,7 @@ class MigrationProject(object):
                 self.__save_project_settings()
                 colorama.deinit()
 
-            # clone the Hg repos (including forks if specified)            
+            # clone the Hg repos (including forks if specified)
             do_hg_pull = True
             if self.__settings['bitbucket_hg_download_complete']:
                 do_hg_pull = q.confirm("hg repositories were pulled during a previous run of this script. Do you want to update them?", default=False).ask()
@@ -563,7 +563,7 @@ class MigrationProject(object):
             # If needed, import all repositories to GitHub
             if self.__settings['import_to_github']:
                 github_auth = (self.__settings['master_github_username'], self.__get_password('github', self.__settings['master_github_username']))
-            
+
                 if self.__settings['hg_to_git_tool'] == 'github':
                     for repository in self.__settings['bb_repositories_to_export']:
                         # skip forks if we are not importing them to github
@@ -599,7 +599,7 @@ class MigrationProject(object):
                             # check if repository already exists
                             owner = self.__settings['github_import_forks_to'] if 'is_fork' in repository and repository['is_fork'] else self.__settings['github_owner']
                             if repository['full_name'] not in self.__settings['github_existing_repositories']:
-                                response = self.create_or_get_github_repository(owner, github_slug, repository, github_auth)                            
+                                response = self.create_or_get_github_repository(owner, github_slug, repository, github_auth)
 
                                 self.__settings['github_existing_repositories'][repository['full_name']] = {
                                     'name': '{owner}/{repo_name}'.format(owner=owner, repo_name=github_slug),
@@ -616,7 +616,7 @@ class MigrationProject(object):
                                 if response.status_code != 204:
                                     print('WARNING: Failed to cancel import with error state (repository: {owner}/{repo_name}). We suggest visiting github.com/{owner}/{repo_name} and attempting to restart the import from there.'.format(owner=owner, repo_name=github_slug))
                                     continue
-                            
+
                             # generate import request to GitHub
                             # TODO: Make this work for private repositories
                             #       Need to confirm with user that they are happy for their BitBucket credentials to be given to GitHub
@@ -681,14 +681,14 @@ class MigrationProject(object):
 
                         github_slug = self.create_github_slug(repository)
                         owner = self.__settings['github_import_forks_to'] if 'is_fork' in repository and repository['is_fork'] else self.__settings['github_owner']
-                        response = self.create_or_get_github_repository(owner, github_slug, repository, github_auth)                            
+                        response = self.create_or_get_github_repository(owner, github_slug, repository, github_auth)
 
                         github_repo_name = '{owner}/{repo_name}'.format(owner=owner, repo_name=github_slug)
                         self.__settings['github_existing_repositories'][repository['full_name']] = {
                             'name': github_repo_name,
                             'repository': response,
                             'import_started': False,
-                            'import_completed': False
+                            'import_completed': False,
                             'import_status': {
                                 'repository_url': 'https://api.github.com/repos/'+github_repo_name
                             }
@@ -709,7 +709,7 @@ class MigrationProject(object):
                     print('Please ensure that your local tool creates git repositories in the specified locations before continuing.')
                     # Pause and continue on user command
                     choices = {
-                        "Continue (my local tool has produced git repositories in the appropriate location)":0, 
+                        "Continue (my local tool has produced git repositories in the appropriate location)":0,
                         "Exit (you can resume this tool later by loading the project and starting the export again)":1,
                     }
                     response = q.select("Select an option below:", choices=choices.keys()).ask()
@@ -810,9 +810,9 @@ class MigrationProject(object):
                         known_hg_git_mapping = logs[repository['full_name']]['git_hg_hashes']
                     mapping[repository['full_name']] = hg2git.BbToGh(logs[repository['full_name']]['hg'], logs[repository['full_name']]['git'], repository['links']['html']['href'], self.__settings['github_existing_repositories'][repository['full_name']]['repository']['html_url'], self.__settings['bb_gh_user_mapping'], archive_url=archive_url, known_hg_git_mapping=known_hg_git_mapping)
 
-            
 
-            # rewrite repository URLS (especiallly inter-repo issues and PRs and forks if appropriate) and changesets    
+
+            # rewrite repository URLS (especiallly inter-repo issues and PRs and forks if appropriate) and changesets
             # (also use the additional URLs to rewrite JSON file)
             #
             # Things we need to handle that probably aren't at the moment
@@ -822,8 +822,8 @@ class MigrationProject(object):
             #       a) Do it in the order of earlist to latest (since commit hashes will change when we do this)
             #       b) update the acquired git log with the new hash
             #       c) Make sure that all the authors are mapped appropriately since force pushing to the github repo will result in you not being able to map any more users.
-            
-            # Note: This is now done as part of the call to exporter.backup_api() in order to not need to hold the entire structure of the 
+
+            # Note: This is now done as part of the call to exporter.backup_api() in order to not need to hold the entire structure of the
             #       BitBucket API (for every repo) in RAM until all repos/forks are downloaded.
             #
             # rewrite URLS to reference the downloaded ones
@@ -888,7 +888,7 @@ class MigrationProject(object):
             # reprocess:
             #   * PR comments so they are in a useful order
             print('Reordering comments...')
-            
+
             if not self.__settings['reorder_comments_complete']:
                 for repository in self.__settings['bb_repositories_to_export']:
                     # open repo.json file, find location of pull requests list
@@ -931,7 +931,7 @@ class MigrationProject(object):
                     for pull_request_file in comment_paths:
                         comment_files = [pull_request_file]
                         comments = []
-                        # Load all comments into RAM, then recursively iterate finding all the ones that have no parent, then all children of the top level, then children of that level, etc. etc. until all comments are placed into a hierarchy. 
+                        # Load all comments into RAM, then recursively iterate finding all the ones that have no parent, then all children of the top level, then children of that level, etc. etc. until all comments are placed into a hierarchy.
                         while pull_request_file:
                             with open(pull_request_file, 'r') as f:
                                 comment_data = json.load(f)
@@ -967,7 +967,7 @@ class MigrationProject(object):
                                     }
                                     parent[comment['id']] = d
                                     comment_flat[comment['id']] = d
-                        
+
                         # Then flatten, split into chunks
                         reordered_comments = flatten_comments(comment_hierarchy, comments, [])
                         for i, pull_request_file in enumerate(comment_files):
@@ -1005,7 +1005,7 @@ class MigrationProject(object):
                                 parts = line.split(' ')
                                 node_tags = hg_tags.get(parts[0], [])
                                 node_tags.append(" ".join(parts[1:]))
-                            
+
                     repo_api_path = os.path.join(self.__settings['project_path'], 'gh-pages', 'data', 'repositories', *repository['full_name'].split('/'))
                     for filename in os.listdir(os.path.join(repo_api_path, 'commit')):
                         if filename.endswith('.json'):
@@ -1033,7 +1033,7 @@ class MigrationProject(object):
                                     missing_git_commits[repository['full_name']] = []
                                 missing_git_commits[repository['full_name']].append(data['hash'])
                                 print('Warning: a matching commit for hg_hash:{hg_hash} was not found in the git repository but the BitBucket API for {repo} said that it exists.'.format(hg_hash=data['hash'], repo=repository['full_name']))
-                            
+
                             with open(os.path.join(repo_api_path, 'commit', filename), 'w') as f:
                                 # write out the data
                                 json.dump(data, f)
@@ -1109,14 +1109,14 @@ class MigrationProject(object):
 
                     if is_org:
                         response = requests.post(
-                            'https://api.github.com/orgs/{owner}/repos'.format(owner=self.__settings['github_owner']),  
-                            auth=github_auth, 
+                            'https://api.github.com/orgs/{owner}/repos'.format(owner=self.__settings['github_owner']),
+                            auth=github_auth,
                             json=repo_data
                         )
                     else:
                         response = requests.post(
-                            'https://api.github.com/user/repos',  
-                            auth=github_auth, 
+                            'https://api.github.com/user/repos',
+                            auth=github_auth,
                             json=repo_data
                         )
                     if response.status_code != 201:
@@ -1132,7 +1132,7 @@ class MigrationProject(object):
                     print('Failed to push changes in gh-pages folder')
                     sys.exit(1)
 
-                
+
                 # Configure for github pages
                 github_headers = {"Accept": 'application/vnd.github.switcheroo-preview+json'}
                 pages_data = {
@@ -1142,8 +1142,8 @@ class MigrationProject(object):
                     }
                 }
                 response = requests.post(
-                    'https://api.github.com/repos/{owner}/{repo}/pages'.format(owner=self.__settings['github_owner'], repo=self.__settings['github_pages_repo_name']),  
-                    auth=github_auth, 
+                    'https://api.github.com/repos/{owner}/{repo}/pages'.format(owner=self.__settings['github_owner'], repo=self.__settings['github_pages_repo_name']),
+                    auth=github_auth,
                     headers=github_headers,
                     json=pages_data
                 )
@@ -1165,8 +1165,8 @@ class MigrationProject(object):
                         "source": "master"
                     }
                 response = requests.put(
-                    'https://api.github.com/repos/{owner}/{repo}/pages'.format(owner=self.__settings['github_owner'], repo=self.__settings['github_pages_repo_name']),  
-                    auth=github_auth, 
+                    'https://api.github.com/repos/{owner}/{repo}/pages'.format(owner=self.__settings['github_owner'], repo=self.__settings['github_pages_repo_name']),
+                    auth=github_auth,
                     json=pages_data
                 )
                 if response.status_code != 204:
@@ -1174,12 +1174,12 @@ class MigrationProject(object):
                     print(response.json())
                     sys.exit(1)
                 print('done!')
-            
+
             # Upload issues to GitHub if requested (using rewritten URLs/changesets)
             # URL to get last existing issue number: https://api.github.com/search/issues?q=repo:philipstarkey/qtutils+sort:author-date-desc&sort=created&order=desc
             if self.__settings['import_to_github'] and self.__settings['github_import_issues'] and not self.__settings['github_issue_import_complete']:
                 print('Performing dry run of GitHub issue import')
-                for repository in self.__settings['bb_repositories_to_export']: 
+                for repository in self.__settings['bb_repositories_to_export']:
                     bb_repo = repository['full_name']
                     gh_repo = self.__settings['github_existing_repositories'][bb_repo]['repository']['full_name']
                     import_issues_to_github(bb_repo, gh_repo, github_auth, copy.deepcopy(self.__settings), mapping, dry_run=True)
@@ -1188,7 +1188,7 @@ class MigrationProject(object):
                 do_import = q.confirm('Do you want to proceed with the import of issues to GitHub (this can only be attempted once)?', default=False).ask()
 
                 if do_import:
-                    for repository in self.__settings['bb_repositories_to_export']: 
+                    for repository in self.__settings['bb_repositories_to_export']:
                         bb_repo = repository['full_name']
                         gh_repo = self.__settings['github_existing_repositories'][bb_repo]['repository']['full_name']
                         print('Importing issues from BitBucket/{} to GitHub/{}'.format(bb_repo, gh_repo))
@@ -1199,7 +1199,7 @@ class MigrationProject(object):
                     self.__save_project_settings()
 
 
-            
+
 
             # Import wikis
 
@@ -1235,14 +1235,14 @@ class MigrationProject(object):
             print('Creating repository {}/{}'.format(owner, github_slug))
             if is_org:
                 response = requests.post(
-                    'https://api.github.com/orgs/{owner}/repos'.format(owner=owner),  
-                    auth=github_auth, 
+                    'https://api.github.com/orgs/{owner}/repos'.format(owner=owner),
+                    auth=github_auth,
                     json=repo_data
                 )
             else:
                 response = requests.post(
-                    'https://api.github.com/user/repos',  
-                    auth=github_auth, 
+                    'https://api.github.com/user/repos',
+                    auth=github_auth,
                     json=repo_data
                 )
             if response.status_code != 201:
@@ -1308,7 +1308,7 @@ class MigrationProject(object):
         except BaseException:
             return False
 
-        # Make sure the path exists, that it is a directory, and that the 
+        # Make sure the path exists, that it is a directory, and that the
         # directory is empty
         if os.path.exists(self.__settings['project_path']) and os.path.isdir(self.__settings['project_path']) and not os.listdir(self.__settings['project_path']):
             return True
@@ -1357,7 +1357,7 @@ class MigrationProject(object):
                 return
             else:
                 raise RuntimeError('Unknown option selected')
-        
+
 
     def __get_bitbucket_repositories(self):
         # Get BitBucket repo/project/team/user that we want to back up
@@ -1391,7 +1391,7 @@ class MigrationProject(object):
                 return False
 
             return True
-        
+
         success = recursively_process_repositories(status, json_response, bb_repositories)
         if not success:
             print('Could not get a list of repositories from BitBucket. Please check the specified repository owner (user/team) is correct and try again.')
@@ -1439,7 +1439,7 @@ class MigrationProject(object):
 
     def __get_github_import_options(self):
         choices = {
-            "I need to create new repositories on GitHub for all previously selected BitBucket repositories":0, 
+            "I need to create new repositories on GitHub for all previously selected BitBucket repositories":0,
             "I already have repositories on GitHub for some of the BitBucket repositories I previously selected":1,
             "I don't want to import to GitHub":2,
         }
@@ -1447,7 +1447,7 @@ class MigrationProject(object):
         if choices[response] == 0 or choices[response] == 1:
             self.__settings['import_to_github'] = True
             self.__get_master_github_credentials()
-            
+
             # Get team/user where the repositories should be created
             self.__settings['github_owner'] = q.text('Enter the GitHub user or organisation that will own the new repositories?', default=self.__settings['github_owner']).ask()
             # Get list of GitHub repositories
@@ -1459,7 +1459,7 @@ class MigrationProject(object):
             self.__settings['github_user_mapping_path'] = q.text('Enter the path to a JSON file containing username mappings between BitBucket and GitHub:', default=os.getcwd()).ask()
             # Hg to Git conversion tool
             choices = {
-                "Use the GitHub source import tool":'github', 
+                "Use the GitHub source import tool":'github',
                 "Use my own local tool":'local',
             }
             self.__settings['hg_to_git_tool'] = choices[q.select("What would you like to use to convert the mercurial repositories to git repositories?", choices=choices.keys()).ask()]
@@ -1480,7 +1480,7 @@ class MigrationProject(object):
                     else:
                         break
                 choices = {
-                    "No custom URL":0, 
+                    "No custom URL":0,
                     "I have a custom domain for the specific repository":1,
                     "My user/organistion has a custom domain for all repositories":2,
                 }
@@ -1541,7 +1541,7 @@ class MigrationProject(object):
             })
         else:
             raise RuntimeError('Unknown option selected')
-    
+
     def __get_github_repositories(self, forks=False):
         looping = True
         # loop until user says "done"
@@ -1579,7 +1579,7 @@ class MigrationProject(object):
 
             # ask the user if they want to do more
             choices = {
-                "Edit another mapping between BitBucket and GitHub repositories":0, 
+                "Edit another mapping between BitBucket and GitHub repositories":0,
                 "Continue with export":1,
             }
             response = q.select("What would you like to do?", choices=choices.keys()).ask()
@@ -1611,7 +1611,7 @@ class MigrationProject(object):
         # print('    Backup BitBucket commit comments: {}'.format(str(self.__settings['backup_commit_comments'])))
         # print('        Generate HTML pages: {}'.format(str(self.__settings['generate_static_commit_comments_pages'])))
         print('    Backup forks: {}'.format(str(self.__settings['backup_forks'])))
-        
+
         print('    Import to GitHub: {}'.format(str(self.__settings['import_to_github'])))
         if self.__settings['import_to_github']:
             print('        GitHub username: {}'.format(str(self.__settings['master_github_username'])))
@@ -1629,7 +1629,7 @@ class MigrationProject(object):
             print('        Import BitBucket forks to GitHub: {}'.format(str(self.__settings['github_import_forks'])))
             print('            Forks will be imported to GitHub user/organisation: {}'.format(str(self.__settings['github_import_forks_to'])))
             print('        These repositories are already on GitHub (including imports initiated by this script in previous runs:)')
-            for bitbucket_name, repo in self.__settings['github_existing_repositories'].items(): 
+            for bitbucket_name, repo in self.__settings['github_existing_repositories'].items():
                 print('            BitBucket/{} -> GitHub/{}'.format(bitbucket_name, repo['name']))
             if not self.__settings['github_existing_repositories']:
                 print('            None')
@@ -1639,7 +1639,7 @@ class MigrationProject(object):
 
     def __get_master_bitbucket_credentials(self, force_new_password=False):
         self.__settings['master_bitbucket_username'] = self.__get_bitbucket_credentials(self.__settings['master_bitbucket_username'], force_new_password)
-    
+
     def __get_master_github_credentials(self, force_new_password=False):
         self.__settings['master_github_username'] = self.__get_github_credentials(self.__settings['master_github_username'], force_new_password)
 
@@ -1649,7 +1649,7 @@ class MigrationProject(object):
 
         # Get password/token
         self.__get_password('bitbucket', username, silent=False, force_new_password=force_new_password)
-        
+
         return username
 
     def __get_github_credentials(self, username, force_new_password=False):
@@ -1658,14 +1658,14 @@ class MigrationProject(object):
 
         # Get password/token
         self.__get_password('github', username, silent=False, force_new_password=force_new_password)
-        
+
         return username
 
     def __get_password(self, service, username, silent=True, force_new_password=False):
         if not force_new_password:
             # TODO: Look for saved passwords from other applications? (e.g. TortoiseHg)
             password = self.__auth_credentials[service].get(username, None) or keyring.get_password(KEYRING_SERVICES[service], username)
-            
+
             if password is not None:
                 # check the password works
                 status, _ = SERVICE_CHECKS[service]((username, password))
@@ -1691,7 +1691,7 @@ class MigrationProject(object):
                 password = q.text("Enter your access token:").ask()
             else:
                 raise RuntimeError('Unknown option selected')
-            
+
             # check the password works
             status, _ = SERVICE_CHECKS[service]((username, password))
             if status == 200:
@@ -1708,7 +1708,7 @@ class MigrationProject(object):
             keyring.set_password(KEYRING_SERVICES[service], username, password)
 
         return password
-        
+
 
 prog = re.compile(r'\"{}(.*?)\"'.format(bitbucket_api_url), re.MULTILINE)
 
@@ -1717,7 +1717,7 @@ prog = re.compile(r'\"{}(.*?)\"'.format(bitbucket_api_url), re.MULTILINE)
 class BitBucketExport(object):
     #
     # This code is terrible and is not going to do what I want.
-    # We can't parallelise the download of JSON data if we want to be able to 
+    # We can't parallelise the download of JSON data if we want to be able to
     # resume it without processing every saved JSON file
     #
     def __init__(self, owner, credentials, options, post_message, subset=None):
@@ -1793,7 +1793,7 @@ class BitBucketExport(object):
             self.__current_tree_location = ()
             self.tree_new_level()
 
-    def __backup_api(self):    
+    def __backup_api(self):
         self.file_download_regexes = [
             re.compile(r'\"(https://bitbucket\.org/repo/(?:[a-zA-Z0-9]+)/images/(?:.+?))\\\"', re.MULTILINE), # images in HTML
             re.compile(r'\"(https://pf-emoji-service--cdn\.(?:[a-zA-Z0-9\-]+)\.prod\.public\.atl-paas\.net/(?:.+?))\\\"', re.MULTILINE), # emojis
@@ -1804,7 +1804,7 @@ class BitBucketExport(object):
         ]
 
         # TODO: probably want to save some of these...the question is how far do we go down the tree.
-        #       for example, users link to other repos which then result in you saving data for every 
+        #       for example, users link to other repos which then result in you saving data for every
         #       repo for every user, etc, etc.
         ignore_rules = [
             {'type': 'in', 'not':False, 'string':'repositories/{owner}/{repo}/patch'.format(owner=self.__owner, repo=self.__repository)},
@@ -1844,71 +1844,71 @@ class BitBucketExport(object):
         rewrite_rules = [
             # special case for pull requests
             {
-                'endpoint_match':['repositories/{owner}/{repo}/pullrequests'.format(owner=self.__owner, repo=self.__repository)], 
+                'endpoint_match':['repositories/{owner}/{repo}/pullrequests'.format(owner=self.__owner, repo=self.__repository)],
                 'rewrites':[
                     {
-                        'params_match':{'state':None}, 
+                        'params_match':{'state':None},
                         'params_to_update':{'state': ['MERGED', 'OPEN', 'SUPERSEDED', 'DECLINED']},
                     },
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 50},
                     },
                     {
-                        'params_match':{'page':None}, 
+                        'params_match':{'page':None},
                         'params_to_update':{'page': 1},
                     },
                     {
-                        'params_match':{'sort':'*'}, 
+                        'params_match':{'sort':'*'},
                         'params_to_update':{'sort': 'created_on'},
                     },
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 50 but don't have a page by default
             {
                 'endpoint_match':[
                     re.compile(r'repositories\/{owner}\/{repo}/pullrequests\/(\d+)\/activity(\?*)(?!\/).*'.format(owner=self.__owner, repo=self.__repository)),
                     'repositories/{owner}/{repo}/pullrequests/activity'.format(owner=self.__owner, repo=self.__repository),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 50},
                     },
                     {
-                        'params_match':{'sort':'*'}, 
+                        'params_match':{'sort':'*'},
                         'params_to_update':{'sort': 'created_on'},
                     },
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 100 but don't have a page by default
             {
                 'endpoint_match':[
                     'repositories/{owner}/{repo}/refs/tags'.format(owner=self.__owner, repo=self.__repository),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 100},
                     },
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 100 but don't have a page by default and should be sorted by creation date
             {
                 'endpoint_match':[
                     re.compile(r'repositories\/{owner}\/{repo}/issues\/(\d+)\/changes(\?*)(?!\/).*'.format(owner=self.__owner, repo=self.__repository)),
                     re.compile(r'repositories\/{owner}\/{repo}/pullrequests\/(\d+)\/commits(\?*)(?!\/).*'.format(owner=self.__owner, repo=self.__repository)),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 100},
                     },
                     {
-                        'params_match':{'sort':'*'}, 
+                        'params_match':{'sort':'*'},
                         'params_to_update':{'sort': 'created_on'},
                     },
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 100
             {
@@ -1920,17 +1920,17 @@ class BitBucketExport(object):
                     'repositories/{owner}/{repo}/refs/branches'.format(owner=self.__owner, repo=self.__repository),
                     'repositories/{owner}/{repo}/versions'.format(owner=self.__owner, repo=self.__repository),
                     'repositories/{owner}/{repo}/watchers'.format(owner=self.__owner, repo=self.__repository),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 100},
                     },
                     {
-                        'params_match':{'page':None}, 
+                        'params_match':{'page':None},
                         'params_to_update':{'page': 1},
                     }
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 100 and should be sorted by creation date
             {
@@ -1944,37 +1944,37 @@ class BitBucketExport(object):
                     'repositories/{owner}/{repo}/commits'.format(owner=self.__owner, repo=self.__repository),
                     'repositories/{owner}/{repo}/forks'.format(owner=self.__owner, repo=self.__repository),
                     'repositories/{owner}/{repo}/issues'.format(owner=self.__owner, repo=self.__repository),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 100},
                     },
                     {
-                        'params_match':{'page':None}, 
+                        'params_match':{'page':None},
                         'params_to_update':{'page': 1},
                     },
                     {
-                        'params_match':{'sort':'*'}, 
+                        'params_match':{'sort':'*'},
                         'params_to_update':{'sort': 'created_on'},
                     },
-                ]  
+                ]
             },
             # endpoints that take a max pagelen of 5000
             {
                 'endpoint_match':[
                     re.compile(r'repositories\/{owner}\/{repo}\/diffstat\/.*'.format(owner=self.__owner, repo=self.__repository)),
-                ], 
+                ],
                 'rewrites':[
                     {
-                        'params_match':{'pagelen':None}, 
+                        'params_match':{'pagelen':None},
                         'params_to_update':{'pagelen': 5000},
                     },
                     {
-                        'params_match':{'page':None}, 
+                        'params_match':{'page':None},
                         'params_to_update':{'page': 1},
                     }
-                ]  
+                ]
             },
         ]
 
@@ -2111,7 +2111,7 @@ class BitBucketExport(object):
         # If so, we don't want to delete the ctx if there is no other indication of pagination
         if "page" in endpoint_simplified_params and "ctx" in endpoint_simplified_params:
             del endpoint_simplified_params['ctx']
-        # This information is stored inside the file anyway, and every URL should be being grabbed with the 
+        # This information is stored inside the file anyway, and every URL should be being grabbed with the
         # largest number of items per page anyway (to reduce the number of API calls we need to make)
         if "pagelen" in endpoint_simplified_params:
             del endpoint_simplified_params['pagelen']
@@ -2168,7 +2168,7 @@ class BitBucketExport(object):
                 self.__files_downloaded -= 1
                 self.__print_update(force=True)
                 return
-        
+
             with open(endpoint_path, 'w') as f:
                 json.dump(json_data, f)
 
@@ -2235,7 +2235,7 @@ class BitBucketExport(object):
                 self.url_queue.put((bb_endpoint_to_full_url(result), tree[-1]['children']))
                 # self.get_and_save_json(bb_endpoint_to_full_url(result), ignore_rules, rewrite_rules, tree[-1]['children'])
                 self.tree_increment_level()
-            
+
             self.tree_finished_level()
 
         elif response.status_code == 401:
@@ -2256,7 +2256,7 @@ class BitBucketExport(object):
 
     def make_urls_relative(self, tree=None, parent_percent=0, parent_percent_subset=100.0, mapping=None):
         # tree.append({'url': base_url, 'rewritten_url': rewritten_base_url, 'endpoint_path':endpoint_path, 'already_processed': False, 'children': []})
-        
+
         top_level = False
         if tree is None:
             tree = self.__tree
@@ -2311,7 +2311,7 @@ class BitBucketExport(object):
 
                     # apply relevant BB to GH transformation
                     # find repo name
-                    # apply all transformations 
+                    # apply all transformations
                     for name in mapping:
                         data = data.replace('https://bitbucket.org/{}'.format(name), '#!/{}'.format(name))
 
@@ -2329,7 +2329,7 @@ class BitBucketExport(object):
             self.url_queue.put({
                 'tree': item['children'],
                 'mapping': mapping,
-                'parent_percent': parent_percent, 
+                'parent_percent': parent_percent,
                 'parent_percent_subset': parent_percent_subset,
             })
             # self.make_urls_relative(item['children'], parent_percent=parent_percent, parent_percent_subset=parent_percent_subset, mapping=mapping)
